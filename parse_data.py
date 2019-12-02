@@ -6,6 +6,12 @@ Created on Fri Nov 29 08:59:17 2019
 @author: gtsal
 """
 
+
+import wave
+import sys
+
+import librosa
+import librosa.display
 import pandas as pd
 import numpy as np
 import os
@@ -125,6 +131,9 @@ print(df_demo)
 
 df_diag = pd.read_csv(patient_diagnosis, header=None, names=diagn_col_names)
 df_diag.head(10)
+
+
+
 print(df_diag)
 
 df_diag.groupby('diagnosis')['patient_id'].nunique().plot(kind='bar')
@@ -161,47 +170,78 @@ both = graph_spectrogram(audio_path_1)
 healthy = graph_spectrogram(audio_path)
 
 
-#read wav file and export with 24bit bitrate
-#s1 = AudioSegment.from_file(audio_path, format = "wav" )
-#s1.export(audio_path , bitrate="24", format="wav")
-#s2 = AudioSegment.from_file(audio_path_1, format = "wav" )
-#s2.export(audio_path_1 , bitrate="24", format="wav")
 
-
-# Load the data and calculate the time of each sample
-#samplerate, data = wavfile.read(audio_path)
-#times1 = np.arange(len(data))/float(samplerate)*2
-#
-## Make the plot
-## You can tweak the figsize (width, height) in inches
-#plt.figure(figsize=(100, 10))
-#plt.fill_between(times1, data) 
-#plt.xlim(times1[0], times1[-1])
-#plt.xlabel('time (s)')
-#plt.ylabel('frequency')
-## You can set the format by changing the extension
-## like .pdf, .svg, .eps
-#plt.savefig('plot.png', dpi=100)
-#plt.show()
-#
-## Load the data and calculate the time of each sample
-#samplerate, data = wavfile.read(audio_path_1)
-#times2 = np.arange(len(data))/float(samplerate)
-#
-#
-## Make the plot
-## You can tweak the figsize (width, height) in inches
-#plt.figure(figsize=(100, 10))
-#plt.fill_between(times2, data) 
-#plt.xlim(times2[0], times2[-1])
-#plt.xlabel('time (s)')
-#plt.ylabel('frequency')
-## You can set the format by changing the extension
-## like .pdf, .svg, .eps
-#plt.savefig('plot.png', dpi=100)
-#plt.show()
 #
 
 plot_wav(audio_path)
 plot_wav(audio_path_1)
 plot_wav(audio_path_2)
+
+
+
+
+def create_dataframe(folder):
+    for root, dirs, files in os.walk(folder):
+        for file in files:
+            if file.endswith('.wav'):
+                soundwav.append(file)
+    data = [];
+    
+    for file in soundwav:
+        if file[:3] not in data:
+            data.append(file[:3])
+    data = sorted(data)
+    
+    arr = np.array(data)
+    
+    row =[]
+    
+    for i in data :
+        r1=[]
+        for file in soundwav:
+            if file[:3]==i:
+                r1.append(file)
+        row.append(r1)
+                
+    
+    df=pd.DataFrame(row,index=data)
+    col = []
+    for i in range(1,df.shape[1]+1):
+        col.append('soundtrack-'+str(i))
+    
+    df.columns = col
+    del arr
+    del file
+    del files
+    del dirs
+    del col
+    del data
+    del r1
+    del root
+    del row
+    return df
+
+
+soundwav = []
+folder = base_path + "audio_and_txt_files/";
+
+df = create_dataframe(folder)
+file = folder + df.iloc[121,2]
+print(file)
+spf = wave.open(file,"r")
+signal = spf.readframes(-1)
+signal = np.fromstring(signal,"Int16")
+print(df.head)
+
+#df = pd.DataFrame(row,columns=['id'])
+# If Stereo
+if spf.getnchannels() == 2:
+    print("Just mono files")
+    sys.exit(0)
+
+plt.figure(1)
+plt.title("Signal Wave...")
+plt.plot(signal)
+plt.show()
+
+
