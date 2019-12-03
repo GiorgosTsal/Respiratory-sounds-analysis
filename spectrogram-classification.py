@@ -17,8 +17,9 @@ import os, glob, wave
 import ntpath
 import os.path
 
+clear = lambda: os.system('clear')
+clear()
 
-clear() 
 sound_dir_loc=np.array(gb.glob("/home/gtsal/Desktop/Machine learning/respiratory-sound-database/Respiratory_Sound_Database/Respiratory_Sound_Database/audio_and_txt_files/*.wav"))
 
 data_path = '/home/gtsal/Desktop/Machine learning/respiratory-sound-database/Respiratory_Sound_Database/Respiratory_Sound_Database/'
@@ -61,9 +62,18 @@ def Extract_Annotation_Data(file_name, root):
     recording_annotations = pd.read_csv(os.path.join(root, file_name + '.txt'), names = ['Start', 'End', 'Crackles', 'Wheezes'], delimiter= '\t')
     return (recording_info, recording_annotations)
 
+
+patient_diagnosis = data_path + 'patient_diagnosis.csv'
+diagn_col_names = ['patient_id','diagnosis']
+df_diag = pd.read_csv(patient_diagnosis, header=None, names=diagn_col_names)
+print(df_diag.sort_values(by=['diagnosis']).to_csv(data_path +'diagnosis_sorted.csv', sep='\t', header = True, index=False))
+
+
+
+
+
+
 filenames = [s.split('.')[0] for s in os.listdir(path = audio_path)]
-
-
 
 i_list = []
 rec_annotations = []
@@ -100,47 +110,6 @@ for f in filenames:
     wheeze_list.append(n_wheezes)
     both_sym_list.append(both_sym)
     filename_list.append(f)  
-    
-   # print('sto file: ' + f + 'to no_labels einai: ' + str(no_labels))
-#    if no_labels!=0:
-#        print('healthy man...')
-#        directory = data_path + 'healthy/'
-#        if not os.path.exists(directory):
-#            os.makedirs(directory)
-#            print(directory + " created succesfully...")
-#        else:
-#            print(directory)
-#            build_spectogram(data_path + 'audio_and_txt_files/' + f + '.wav', 'healthy_' +str(i) + '_' + f, directory)
-#    elif n_crackles!=0:
-#        print('crackles man...')
-#        directory = data_path + 'crackles/'
-#        if not os.path.exists(directory):
-#            os.makedirs(directory)
-#            print(directory + " created succesfully...")
-#        else:
-#            print(directory)
-#            build_spectogram(data_path + 'audio_and_txt_files/' + f + '.wav',  'crackles' +str(i) + '_' + f, directory) 
-#    elif n_wheezes!=0:
-#        print('wheezes man...')
-#        directory = data_path + 'wheezes/'
-#        if not os.path.exists(directory):
-#            os.makedirs(directory)
-#            print(directory + " created succesfully...")
-#        else:
-#            print(directory)
-#            build_spectogram(data_path + 'audio_and_txt_files/' + f + '.wav',  'wheezes' +str(i) + '_' + f, directory)
-#       
-#    elif both_sym!=0:
-#        print('both man...')
-#        directory = data_path + 'both/'
-#        if not os.path.exists(directory):
-#            os.makedirs(directory)
-#            print(directory + " created succesfully...")
-#        else:
-#            print(directory)
-#            build_spectogram(data_path + 'audio_and_txt_files/' + f + '.wav',  'both' +str(i) + '_' + f, directory)
-
-
 
 
 file_label_df = pd.DataFrame(data = {'filename':filename_list, 'no label':no_label_list, 'crackles only':crack_list, 'wheezes only':wheeze_list, 'crackles and wheezees':both_sym_list})
@@ -151,23 +120,50 @@ file_label_df = file_label_df.drop_duplicates(subset='filename', keep='first')
 w_labels = file_label_df[(file_label_df['no label'] != 0) | (file_label_df['crackles only'] != 0) | (file_label_df['wheezes only'] != 0) | (file_label_df['crackles and wheezees'] != 0)]
 file_label_df.sum()
 
-
-#np.savetxt(r'/home/gtsal/Desktop/Machine learning/respiratory-sound-database/Respiratory_Sound_Database/Respiratory_Sound_Database/file_label_df.txt', file_label_df.values, fmt='%s')
 print('=========================================================')
-#print(file_label_df.sort_values(by=['filename']))
-file_label_df.to_csv('/home/gtsal/Desktop/Machine learning/respiratory-sound-database/Respiratory_Sound_Database/Respiratory_Sound_Database/file_label_df.csv', sep='\t', header = True, index=False)
-w_labels.sort_values(by=['filename']).to_csv('/home/gtsal/Desktop/Machine learning/respiratory-sound-database/Respiratory_Sound_Database/Respiratory_Sound_Database/w_labels.csv', sep='\t', header = True, index=False)
+
+file_label_df.to_csv(data_path + 'file_label_df.csv', sep='\t', header = True, index=False)
+w_labels.sort_values(by=['filename']).to_csv(data_path + 'w_labels.csv', sep='\t', header = True, index=False)
+
+   
+i = 0;
+for index, col in file_label_df.iterrows():
+   # print(col['filename'] +  '==' + str(col['no label'])+  '==' + str(col['crackles only'])+  '==' + str(col['wheezes only'])+  '==' + str(col['crackles and wheezees']))
+    if col['no label'] != 0 :
+        directory = data_path + 'healthy/'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(directory + " created succesfully...")
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav',  str(i) + '_' + str(col['filename']), directory)
+        else:
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)
+    if col['crackles only'] != 0 :
+        directory = data_path + 'crackles/'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(directory + " created succesfully...")
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)
+        else:
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)    
+    if col['wheezes only'] != 0 :
+        directory = data_path + 'wheezes/'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(directory + " created succesfully...")
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)
+        else:
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)           
+    if col['crackles and wheezees'] != 0 :
+        directory = data_path + 'both/'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(directory + " created succesfully...")
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)
+        else:
+            build_spectogram(data_path + 'audio_and_txt_files/' + str(col['filename']) + '.wav', str(i) + '_' + str(col['filename']), directory)
+            
+    i = i + 1
 
 
-for (index_label, row_series) in file_label_df.iterrows():
-   print('Row Index label : ', index_label)
-   print('Row Content as Series : ', row_series.values)
 
-    
 
-#    
-#file_label_df = pd.DataFrame(data = {'filename':filename_list, 'no label':no_label_list, 'crackles only':crack_list, 'wheezes only':wheeze_list, 'crackles and wheezees':both_sym_list})
-#    
-#w_labels = file_label_df[(file_label_df['crackles only'] != 0) | (file_label_df['wheezes only'] != 0) | (file_label_df['crackles and wheezees'] != 0)]
-#file_label_df.sum()   
-#print(file_label_df.sum())

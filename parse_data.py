@@ -137,7 +137,7 @@ df_diag.head(10)
 print(df_diag)
 
 df_diag.groupby('diagnosis')['patient_id'].nunique().plot(kind='bar')
-plt.show()
+
 
 plt.show()
 
