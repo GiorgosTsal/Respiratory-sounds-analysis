@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec  2 11:38:13 2019
-
-Mel spectrogram implementation (With VTLP)
+Created on Sun Dec 22 18:31:10 2019
 
 @author: gtsal
 """
 
 import scipy.signal
 import numpy as np
-import utilities as utils
-
+import Utils
 
 #vtlp_params = (alpha, f_high) 
 def sample2MelSpectrum(cycle_info, sample_rate, n_filters, vtlp_params):
@@ -105,66 +102,3 @@ def label2onehot(c_w_flags):
         return [0,0,1,0]
     else:
         return [0,0,0,1]
-    
-    
-    
-    
-    
-#Creates a copy of each time slice, but stretches or contracts it by a random amount
-def gen_time_stretch(original, sample_rate, max_percent_change):
-    stretch_amount = 1 + np.random.uniform(-1,1) * (max_percent_change / 100)
-    (_, stretched) = utils.resample(sample_rate, original, int(sample_rate * stretch_amount)) 
-    return stretched
-
-#Same as above, but applies it to a list of samples
-def augment_list(audio_with_labels, sample_rate, percent_change, n_repeats):
-    augmented_samples = []
-    for i in range(n_repeats):
-        addition = [(gen_time_stretch(t[0], sample_rate, percent_change), t[1], t[2] ) for t in audio_with_labels]
-        augmented_samples.extend(addition)
-    return augmented_samples
-
-#Takes a list of respiratory cycles, and splits and pads each cycle into fixed length buffers (determined by desiredLength(seconds))
-#Then takes the split and padded sample and transforms it into a mel spectrogram
-#VTLP_alpha_range = [Lower, Upper] (Bounds of random selection range), 
-#VTLP_high_freq_range = [Lower, Upper] (-)
-#output:[(arr:float[],c:float_bool,w:float_bool),(arr,c,w)]
-def split_and_pad_and_apply_mel_spect(original, desiredLength, sampleRate, VTLP_alpha_range = None, VTLP_high_freq_range = None, n_repeats = 1):
-    output = []
-    for i in range(n_repeats):
-        for d in original:
-            lst_result = split_and_pad(d, desiredLength, sampleRate) #Time domain
-            if( (VTLP_alpha_range is None) | (VTLP_high_freq_range is None) ):
-                #Do not apply VTLP
-                VTLP_params = None
-            else:
-                #Randomly generate VLTP parameters
-                alpha = np.random.uniform(VTLP_alpha_range[0], VTLP_alpha_range[1])
-                high_freq = np.random.uniform(VTLP_high_freq_range[0], VTLP_high_freq_range[1])
-                VTLP_params = (alpha, high_freq)
-            freq_result = [sample2MelSpectrum(d, sampleRate, 50, VTLP_params) for d in lst_result] #Freq domain
-            output.extend(freq_result)
-    return output    
-
-
-
-str_file = filenames[11]
-lp_test = get_sound_samples(rec_annotations_dict[str_file], str_file, root, 22000)
-lp_cycles = [(d[0], d[3], d[4]) for d in lp_test[1:]]
-soundclip = lp_cycles[1][0]
-
-n_window = 512
-sample_rate = 22000
-(f, t, Sxx) = scipy.signal.spectrogram(soundclip, fs = 22000, nfft= n_window, nperseg=n_window)
-print(sum(f < 7000))
-
-plt.figure(figsize = (20,10))
-plt.subplot(1,2,1)
-mel_banks = FFT2MelSpectrogram(f[:175], Sxx[:175,:], sample_rate, 50)[1]
-plt.imshow(mel_banks, aspect = 1)
-plt.title('No VTLP')
-
-plt.subplot(1,2,2)
-mel_banks = FFT2MelSpectrogram(f[:175], Sxx[:175,:], sample_rate, 50, vtlp_params = (0.9,3500))[1]
-plt.imshow(mel_banks, aspect = 1)
-plt.title('With VTLP')
