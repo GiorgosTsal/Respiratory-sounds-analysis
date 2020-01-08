@@ -219,46 +219,62 @@ param_grid = {'C': [0.1, 1, 10, 100, 1000],
               'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 
               'kernel': ['rbf', 'poly', 'sigmoid', 'linear']}  
   
-grid = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
+grid1 = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
   
 # fitting the model for grid search 
-grid.fit(x_train1, y_train1)
+grid1.fit(x_train1, y_train1)
 
 # print best parameter after tuning 
-print(grid.best_params_) 
+print(grid1.best_params_) 
   
 # print how our model looks after hyper-parameter tuning 
-print(grid.best_estimator_)
+print(grid1.best_estimator_)
 
-grid_predictions = grid.predict(x_test1) 
+grid_predictions = grid1.predict(x_test1) 
   
 # print classification report 
 print(classification_report(y_test1, grid_predictions))
 
+#After parameter tuning best parameters for weezles(model1)
+#
+#{'C': 10, 'gamma': 0.1, 'kernel': 'rbf'}
 
-#After parameter tuning best parameters for weezles
-
-# {'C': 0.1, 'gamma': 0.01, 'kernel': 'rbf'}
-
-# SVC(C=0.1, break_ties=False, cache_size=200, class_weight=None, coef0=0.0,
-#     decision_function_shape='ovr', degree=3, gamma=0.01, kernel='rbf',
-#     max_iter=-1, probability=False, random_state=None, shrinking=True,
-#     tol=0.001, verbose=False)
-
-#          precision    recall  f1-score   support
-
-#          0.0       0.67      0.90      0.77      1359
-#          1.0       0.43      0.14      0.22       711
-
-#     accuracy                           0.64      2070
-#    macro avg       0.55      0.52      0.49      2070
-# weighted avg       0.59      0.64      0.58      2070
+#SVC(C=10, cache_size=200, class_weight=None, coef0=0.0,
+#    decision_function_shape='ovr', degree=3, gamma=0.1, kernel='rbf',
+#    max_iter=-1, probability=False, random_state=None, shrinking=True,
+#    tol=0.001, verbose=False)
+#              precision    recall  f1-score   support
+#
+#         0.0       0.66      0.98      0.79      1359
+#         1.0       0.42      0.03      0.06       711
+#
+#    accuracy                           0.65      2070
+#   macro avg       0.54      0.50      0.42      2070
+#weighted avg       0.58      0.65      0.54      2070
 
 
 #model1 = sklearn.svm.SVC(C=0.1, break_ties=False, cache_size=200, class_weight=None, coef0=0.0,
 #     decision_function_shape='ovr', degree=3, gamma=0.01, kernel='rbf',
 #     max_iter=-1, probability=False, random_state=None, shrinking=True,
 #     tol=0.001, verbose=False)
+
+  
+grid2 = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
+  
+# fitting the model for grid search 
+grid1.fit(x_train2, y_train2)
+
+# print best parameter after tuning 
+print(grid2.best_params_) 
+  
+# print how our model looks after hyper-parameter tuning 
+print(grid2.best_estimator_)
+
+grid_predictions = grid2.predict(x_test2) 
+  
+# print classification report 
+print(classification_report(y_test2, grid_predictions))
+
 
 
 #after cross validation best parameters for crackles
