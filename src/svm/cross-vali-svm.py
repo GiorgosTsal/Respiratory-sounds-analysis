@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan  8 10:03:37 2020
+
+@author: gtsal
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -206,26 +214,26 @@ from sklearn.metrics import accuracy_score, f1_score, classification_report
 from sklearn.svm import SVC
 
 
-## defining parameter range 
-#param_grid = {'C': [0.1, 1, 10, 100, 1000],  
-#              'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 
-#              'kernel': ['rbf']}  
-#  
-#grid = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
-#  
-## fitting the model for grid search 
-#grid.fit(x_train2, y_train2)
-#
-## print best parameter after tuning 
-#print(grid.best_params_) 
-#  
-## print how our model looks after hyper-parameter tuning 
-#print(grid.best_estimator_)
-#
-#grid_predictions = grid.predict(x_test2) 
-#  
-## print classification report 
-#print(classification_report(y_test2, grid_predictions))
+# defining parameter range 
+param_grid = {'C': [0.1, 1, 10, 100, 1000],  
+              'gamma': [1, 0.1, 0.01, 0.001, 0.0001], 
+              'kernel': ['rbf', 'poly', 'sigmoid', 'linear']}  
+  
+grid = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
+  
+# fitting the model for grid search 
+grid.fit(x_train1, y_train1)
+
+# print best parameter after tuning 
+print(grid.best_params_) 
+  
+# print how our model looks after hyper-parameter tuning 
+print(grid.best_estimator_)
+
+grid_predictions = grid.predict(x_test1) 
+  
+# print classification report 
+print(classification_report(y_test1, grid_predictions))
 
 
 #After parameter tuning best parameters for weezles
@@ -247,10 +255,10 @@ from sklearn.svm import SVC
 # weighted avg       0.59      0.64      0.58      2070
 
 
-model1 = sklearn.svm.SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
-     decision_function_shape='ovr', degree=3, gamma=0.01, kernel='rbf',
-     max_iter=-1, probability=False, random_state=None, shrinking=True,
-     tol=0.001, verbose=False)
+#model1 = sklearn.svm.SVC(C=0.1, break_ties=False, cache_size=200, class_weight=None, coef0=0.0,
+#     decision_function_shape='ovr', degree=3, gamma=0.01, kernel='rbf',
+#     max_iter=-1, probability=False, random_state=None, shrinking=True,
+#     tol=0.001, verbose=False)
 
 
 #after cross validation best parameters for crackles
@@ -271,28 +279,28 @@ model1 = sklearn.svm.SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
 #weighted avg       0.64      0.80      0.71      2070
 
 
-model2 = sklearn.svm.SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
-    decision_function_shape='ovr', degree=3, gamma=1, kernel='rbf', max_iter=-1,
-    probability=False, random_state=None, shrinking=True, tol=0.001,
-    verbose=False)
+#model2 = sklearn.svm.SVC(C=0.1, cache_size=200, class_weight=None, coef0=0.0,
+#    decision_function_shape='ovr', degree=3, gamma=1, kernel='rbf', max_iter=-1,
+#    probability=False, random_state=None, shrinking=True, tol=0.001,
+#    verbose=False)
 
 # x_train1,y_train1= sklearn.utils.shuffle(x_train1,y_train1,random_state=0)
 # x_train2,y_train2= sklearn.utils.shuffle(x_train2,y_train2,random_state=0)
 # x_test1,y_test1= sklearn.utils.shuffle(x_test1,y_test1,random_state=0)
 # x_test2,y_test2= sklearn.utils.shuffle(x_test2,y_test2,random_state=0)
 
-model1.fit(x_train1,y_train1)
-model2.fit(x_train2,y_train2)
-y_pred1=model1.predict(x_test1)
-y_pred2=model2.predict(x_test2)
-print('Model Wheezes')
-print(sklearn.metrics.accuracy_score(y_test1,y_pred1))
-print(sklearn.metrics.confusion_matrix(y_test1,y_pred1))
-print(sklearn.metrics.classification_report(y_test1, y_pred1))
-print('Model Crackles')
-print(sklearn.metrics.accuracy_score(y_test2,y_pred2))
-print(sklearn.metrics.confusion_matrix(y_test2,y_pred2))
-print(sklearn.metrics.classification_report(y_test2, y_pred2))
+#model1.fit(x_train1,y_train1)
+#model2.fit(x_train2,y_train2)
+#y_pred1=model1.predict(x_test1)
+#y_pred2=model2.predict(x_test2)
+#print('Model Wheezes')
+#print(sklearn.metrics.accuracy_score(y_test1,y_pred1))
+#print(sklearn.metrics.confusion_matrix(y_test1,y_pred1))
+#print(sklearn.metrics.classification_report(y_test1, y_pred1))
+#print('Model Crackles')
+#print(sklearn.metrics.accuracy_score(y_test2,y_pred2))
+#print(sklearn.metrics.confusion_matrix(y_test2,y_pred2))
+#print(sklearn.metrics.classification_report(y_test2, y_pred2))
 
 #[sr,sound] = cns.read_wav_file(files[1],22050)
 #sound=ld[:,0]
