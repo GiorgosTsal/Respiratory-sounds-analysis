@@ -262,7 +262,7 @@ print(classification_report(y_test1, grid_predictions))
 grid2 = GridSearchCV(SVC(), param_grid, refit = True, verbose = 3) 
   
 # fitting the model for grid search 
-grid1.fit(x_train2, y_train2)
+grid2.fit(x_train2, y_train2)
 
 # print best parameter after tuning 
 print(grid2.best_params_) 
