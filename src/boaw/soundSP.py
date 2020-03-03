@@ -3,7 +3,8 @@
 """
 Created on Sun Dec  1 18:34:48 2019
 
-@author: panagiotis
+@authors: Panagiotis Kasparidis
+	  Georgios   Tsalidis
 """
 import glob
 import os
@@ -14,7 +15,8 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import specgram
 #%matplotlib inline
 import cnnsound as cns
-
+from pyAudioAnalysis import audioBasicIO #A
+from pyAudioAnalysis import audioFeatureExtraction #B
 from scipy.signal import butter, lfilter, freqz
 
 def butter_lowpass(cutoff, fs, order=5):
@@ -85,18 +87,19 @@ def load_sound_files(file_paths):
     raw_sounds = []
     raw_sr = []
     for fp in file_paths:
-        sr,X = cns.read_wav_file(fp,22050)
+        sr,X = cns.read_wav_file(fp,22000)
+        #reduced_noise = nr.reduce_noise(audio_clip=X, noise_clip=X, verbose=False)# Visualize
         raw_sr.append(sr)
         raw_sounds.append(X)
     return raw_sounds,raw_sr
 
-def plot_waves(raw_sounds,raw_sr):
+def plot_waves(raw_sounds,raw_sr,title=''):
     i = 1
     #fig = plt.figure(figsize=(8,20))
             #plt.subplot(1,1,i)
     fig = plt.figure(figsize=(20,20))
     librosa.display.waveplot(raw_sounds,sr=raw_sr)
-    plt.suptitle("Figure 1: Waveplot",x=0.5, y=0.915,fontsize=7)
+    plt.suptitle(title,x=0.5, y=0.915,fontsize=7)
     plt.show()
     
 def plot_specgram(sound_names,raw_sounds,raw_sr):
@@ -123,19 +126,18 @@ def plot_log_power_specgram(raw_sounds,raw_sr):
 #    plt.suptitle("Figure 3: Log power spectrogram",x=0.5, y=0.915,fontsize=7)
     plt.show()
 
+
+
+
 def extract_feature(X,sample_rate):
-    stft = np.abs(librosa.stft(X))
-    mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=100).T,axis=0)
-    chroma = np.mean(librosa.feature.chroma_stft(S=stft, sr=sample_rate).T,axis=0)
-    mel = np.mean(librosa.feature.melspectrogram(X, sr=sample_rate).T,axis=0)
-    contrast = np.mean(librosa.feature.spectral_contrast(S=stft, sr=sample_rate).T,axis=0)
-    tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X),
-    sr=sample_rate).T,axis=0)
-    result=mfccs.copy()
-    result=np.hstack((result,chroma,mel,contrast,tonnetz))
-    #data.append([mfccs,chroma,mel,contrast,tonnetz])
-    return result
-    #return data
+
+    n_fft=int(sample_rate*0.025)
+    hop_length=int(sample_rate*0.01)
+    mfcc = librosa.feature.mfcc(y=X, sr=sample_rate,n_fft=n_fft,hop_length=hop_length,
+                                         n_mfcc=13)
+
+    return mfcc
+
 
 def parse_audio_files(parent_dir,sub_dirs,file_ext="*.wav"):
     features, labels = np.empty((0,193)), np.empty(0)
@@ -157,3 +159,72 @@ def one_hot_encode(labels):
     one_hot_encode = np.zeros((n_labels,n_unique_labels))
     one_hot_encode[np.arange(n_labels), labels] = 1
     return one_hot_encode
+
+def resample(current_rate, data, target_rate):
+    x_original = np.linspace(0,100,len(data))
+    x_resampled = np.linspace(0,100, int(len(data) * (target_rate / current_rate)))
+    resampled = np.interp(x_resampled, x_original, data)
+    return (target_rate, resampled.astype(np.float32))
+
+
+
+import noisereduce as nr# Load audio file # first pip install noisereduce
+
+import matplotlib.pyplot as plt
+
+# Plot audio with zoomed in y axis
+def plotAudio(output):
+    fig, ax = plt.subplots(nrows=1,ncols=1, figsize=(20,10))
+    plt.plot(output, color='blue')
+    ax.set_xlim((0, len(output)))
+    ax.margins(2, -0.1)
+    plt.show()
+#Creates a copy of each time slice, but stretches or contracts it by a random amount
+def gen_time_stretch(original, sample_rate, max_percent_change):
+    stretch_amount = 1 + np.random.uniform(-1,1) * (max_percent_change / 100)
+    (_, stretched) = resample(sample_rate, original, int(sample_rate * stretch_amount)) 
+    return stretched
+
+def augment_list(audio_with_labels, sample_rate, percent_change, n_repeats):
+    augmented_samples = []
+    for i in range(n_repeats):
+        addition = [(gen_time_stretch(t[0], sample_rate, percent_change), t[1], t[2] ) for t in audio_with_labels]
+        augmented_samples.extend(addition)
+    return augmented_samples
+
+def cluster(clustering, samples,labels):
+    #result = np.zeros((len(samples),max(clustering.labels_)-min(clustering.labels_)))
+    #x=clustering.labels_.copy()
+    result = np.zeros((len(samples),labels))
+    x=clustering
+    for i,size in enumerate(samples):
+        for j in range(size):
+            if i==0:
+                start=0
+            else:
+                start=samples[i-1]
+            
+            result[i,x[start+j]]=result[i,x[start+j]]+1
+
+    return result
+
+def clearEmptyDimensions(data):
+    z= data.T
+    z=z[~np.all(z== 0, axis=1)]
+    z=z.T
+    return z
+
+
+def FE(data,sr):
+    mfcc = extract_feature(data[0],sr)
+    samples=[]
+    samples.append(mfcc.shape[1])
+    mfcc=mfcc.T
+    h=mfcc.copy()
+    
+    for i in range(1,len(data)):
+        mfcc=extract_feature(data[i],sr)
+        mfcc=mfcc.T
+        samples.append(mfcc.shape[0])
+        h=np.vstack((h,mfcc))
+    return h,samples

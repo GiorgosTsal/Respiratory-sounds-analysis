@@ -1,0 +1,8 @@
+Στο φάκελο main βρίσκονται τα αρχεία για την υλοποίηση χωρίς bag of audio words.
+Και οι 2 φάκελοι έχουν ίδια ονοματα στα αρχεία.
+Το main script είναι το cross-vali-svm υπάρχει και στους 2 φακέλους.
+Τα άλλα δύο είναι βοηθητικά για το διάβασμα των κομματιών του ήχου, feature extraction για mfcc
+ και κάποια αρχικά plot που κάναμε ήχο και συχνότητα.
+Θέλει αλλαγή το path για να διαβάζει τα αρχεία ανάλογα που είναι τα data.
+
+Dataset: https://www.kaggle.com/vbookshelf/respiratory-sound-database

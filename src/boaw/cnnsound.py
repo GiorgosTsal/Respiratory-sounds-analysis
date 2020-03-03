@@ -3,7 +3,8 @@
 """
 Created on Thu Dec  5 12:04:28 2019
 
-@author: panagiotis
+@authors: Panagiotis Kasparidis
+	  Georgios   Tsalidis
 """
 
 import wave
